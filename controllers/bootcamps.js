@@ -4,7 +4,18 @@ const ErrorResponse = require("../utils/errorResponse");
 const geocoder = require("../utils/geocoder");
 
 exports.getBootcamps = asyncHandler(async (req, res, next) => {
-  const bootcamps = await Bootcamp.find();
+  let query;
+
+  let queryStr = JSON.stringify(req.query);
+
+  queryStr = queryStr.replace(
+    /\b(gt|gte|lt|lte|in)\b/g,
+    (match) => `$${match}`
+  );
+
+  query = Bootcamp.find(JSON.parse(queryStr));
+
+  const bootcamps = await query;
   if (!bootcamps) {
     return next(
       new ErrorResponse(`Bootcamp not found with the id ${req.params.id}`, 404)
